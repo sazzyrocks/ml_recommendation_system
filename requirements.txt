@@ -1,0 +1,9 @@
+# ── Phase 1: data science & dev tooling ────────────────────────────────────
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+seaborn
+jupyterlab
+pytest
