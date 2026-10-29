@@ -140,13 +140,21 @@ class ContentRecommender(Recommender):
             tag_agg = {}
 
         movie_tag_texts = [tag_agg.get(mid, "") for mid in self.movies_df["movieId"]]
-        self.tfidf_vectorizer = TfidfVectorizer(
-            stop_words="english",
-            min_df=self.min_tag_df,
-            max_features=self.max_tag_features,
-            token_pattern=r"(?u)\b[\w-]+\b",
-        )
-        tag_matrix = self.tfidf_vectorizer.fit_transform(movie_tag_texts).astype(np.float32)
+        if any(text.strip() for text in movie_tag_texts):
+            try:
+                self.tfidf_vectorizer = TfidfVectorizer(
+                    stop_words="english",
+                    min_df=self.min_tag_df,
+                    max_features=self.max_tag_features,
+                    token_pattern=r"(?u)\b[\w-]+\b",
+                )
+                tag_matrix = self.tfidf_vectorizer.fit_transform(movie_tag_texts).astype(np.float32)
+            except ValueError:
+                self.tfidf_vectorizer = None
+                tag_matrix = sparse.csr_matrix((N, 0), dtype=np.float32)
+        else:
+            self.tfidf_vectorizer = None
+            tag_matrix = sparse.csr_matrix((N, 0), dtype=np.float32)
 
         # 4. Release Year Bucket Encoding
         bucket_categories = [
