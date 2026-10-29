@@ -176,7 +176,13 @@ class ItemKNN(Recommender):
             if seen:
                 scores[list(seen)] = -9999.0
 
-        top_indices = np.argpartition(scores, -k)[-k:]
+        actual_k = min(k, len(scores))
+        if actual_k <= 0:
+            return []
+        if actual_k < len(scores):
+            top_indices = np.argpartition(scores, -actual_k)[-actual_k:]
+        else:
+            top_indices = np.arange(len(scores))
         top_indices = top_indices[np.argsort(-scores[top_indices])]
 
         return [(int(idx), float(scores[idx])) for idx in top_indices]
@@ -316,7 +322,13 @@ class BiasedMF(Recommender):
             if seen:
                 scores[list(seen)] = -9999.0
 
-        top_indices = np.argpartition(scores, -k)[-k:]
+        actual_k = min(k, len(scores))
+        if actual_k <= 0:
+            return []
+        if actual_k < len(scores):
+            top_indices = np.argpartition(scores, -actual_k)[-actual_k:]
+        else:
+            top_indices = np.arange(len(scores))
         top_indices = top_indices[np.argsort(-scores[top_indices])]
 
         return [(int(idx), float(scores[idx])) for idx in top_indices]

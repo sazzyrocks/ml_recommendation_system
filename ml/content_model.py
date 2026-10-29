@@ -176,12 +176,28 @@ class ContentRecommender(Recommender):
         )
 
         # 5. Normalize sub-matrices and apply configurable component weights
-        norm_genre = normalize(genre_matrix, norm="l2") * self.weight_genres
-        norm_tags = normalize(tag_matrix, norm="l2") * self.weight_tags
-        norm_year = normalize(year_matrix, norm="l2") * self.weight_year
+        norm_genre = (
+            normalize(genre_matrix, norm="l2") * self.weight_genres
+            if genre_matrix.shape[1] > 0
+            else genre_matrix
+        )
+        norm_tags = (
+            normalize(tag_matrix, norm="l2") * self.weight_tags
+            if tag_matrix.shape[1] > 0
+            else tag_matrix
+        )
+        norm_year = (
+            normalize(year_matrix, norm="l2") * self.weight_year
+            if year_matrix.shape[1] > 0
+            else year_matrix
+        )
 
-        combined = sparse.hstack([norm_genre, norm_tags, norm_year]).tocsr()
-        self.item_matrix = normalize(combined, norm="l2")
+        parts = [p for p in [norm_genre, norm_tags, norm_year] if p.shape[1] > 0]
+        if parts:
+            combined = sparse.hstack(parts).tocsr()
+            self.item_matrix = normalize(combined, norm="l2")
+        else:
+            self.item_matrix = sparse.csr_matrix((N, 0), dtype=np.float32)
         return self.item_matrix
 
     def fit(
@@ -283,7 +299,13 @@ class ContentRecommender(Recommender):
         # Exclude the movie itself
         sims[item_idx] = -1.0
 
-        top_indices = np.argpartition(sims, -k)[-k:]
+        actual_k = min(k, len(sims))
+        if actual_k <= 0:
+            return []
+        if actual_k < len(sims):
+            top_indices = np.argpartition(sims, -actual_k)[-actual_k:]
+        else:
+            top_indices = np.arange(len(sims))
         top_indices = top_indices[np.argsort(-sims[top_indices])]
 
         results: list[dict[str, Any]] = []
@@ -322,7 +344,13 @@ class ContentRecommender(Recommender):
             if seen:
                 scores[list(seen)] = -9999.0
 
-        top_indices = np.argpartition(scores, -k)[-k:]
+        actual_k = min(k, len(scores))
+        if actual_k <= 0:
+            return []
+        if actual_k < len(scores):
+            top_indices = np.argpartition(scores, -actual_k)[-actual_k:]
+        else:
+            top_indices = np.arange(len(scores))
         top_indices = top_indices[np.argsort(-scores[top_indices])]
 
         return [(int(idx), float(scores[idx])) for idx in top_indices]

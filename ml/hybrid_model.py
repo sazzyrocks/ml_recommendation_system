@@ -122,6 +122,16 @@ class HybridRecommender(Recommender):
                 self.item_idx_to_genres[i_idx] = ["Action", "Drama"]
                 self.item_idx_to_mid[i_idx] = i_idx
                 self.mid_to_item_idx[i_idx] = i_idx
+            self.movies_df = pd.DataFrame(
+                {
+                    "movieId": unique_items,
+                    "item_idx": unique_items,
+                    "title": [f"Movie {i}" for i in unique_items],
+                    "clean_title": [f"Movie {i}" for i in unique_items],
+                    "genres": [["Action", "Drama"] for _ in unique_items],
+                    "year": [2020 for _ in unique_items],
+                }
+            )
 
         # 2. Build user histories from train_df
         self.seen_by_user = {}
@@ -174,7 +184,9 @@ class HybridRecommender(Recommender):
             logger.info("Artifacts missing; initializing fallback item factors for testing/CI...")
             n_items = max(8000, max(self.item_idx_to_mid.keys(), default=0) + 1)
             rng = np.random.default_rng(42)
-            self.implicit_als_item_factors = rng.normal(0, 0.1, size=(n_items, 64)).astype(np.float32)
+            self.implicit_als_item_factors = rng.normal(0, 0.1, size=(n_items, 64)).astype(
+                np.float32
+            )
             self._YtY = np.dot(self.implicit_als_item_factors.T, self.implicit_als_item_factors)
 
         logger.info("HybridRecommender components ready.")
@@ -198,9 +210,14 @@ class HybridRecommender(Recommender):
             if 0 <= user_idx < len(self.implicit_als_user_factors):
                 u_factor = self.implicit_als_user_factors[user_idx]
                 als_scores = np.dot(self.implicit_als_item_factors, u_factor)
-                top_als_idx = np.argpartition(als_scores, -n)[-n:]
-                top_als_idx = top_als_idx[np.argsort(-als_scores[top_als_idx])]
-                candidates["implicit_als"] = {int(i): float(als_scores[i]) for i in top_als_idx}
+                actual_n = min(n, len(als_scores))
+                if actual_n > 0:
+                    if actual_n < len(als_scores):
+                        top_als_idx = np.argpartition(als_scores, -actual_n)[-actual_n:]
+                    else:
+                        top_als_idx = np.arange(len(als_scores))
+                    top_als_idx = top_als_idx[np.argsort(-als_scores[top_als_idx])]
+                    candidates["implicit_als"] = {int(i): float(als_scores[i]) for i in top_als_idx}
 
         # 2. ItemKNN candidates
         if self.item_knn is not None:
@@ -480,8 +497,15 @@ class HybridRecommender(Recommender):
                 if norm > 0:
                     prof /= norm
                     sims = self.content_model.item_matrix.dot(prof)
-                    top_c = np.argpartition(sims, -100)[-100:]
-                    content_scores = {int(i): float(sims[i]) for i in top_c if i not in rated_items}
+                    actual_c = min(100, len(sims))
+                    if actual_c > 0:
+                        if actual_c < len(sims):
+                            top_c = np.argpartition(sims, -actual_c)[-actual_c:]
+                        else:
+                            top_c = np.arange(len(sims))
+                        content_scores = {
+                            int(i): float(sims[i]) for i in top_c if i not in rated_items
+                        }
 
         # 3. Fuse sparse scores
         fused, breakdown = fuse_candidate_scores(
@@ -605,8 +629,15 @@ class HybridRecommender(Recommender):
         x_u = self.fold_in_user(user_ratings)
         als_scores = np.dot(self.implicit_als_item_factors, x_u)
 
-        top_als = np.argpartition(als_scores, -100)[-100:]
-        cand_als = {int(i): float(als_scores[i]) for i in top_als}
+        actual_als = min(100, len(als_scores))
+        if actual_als > 0:
+            if actual_als < len(als_scores):
+                top_als = np.argpartition(als_scores, -actual_als)[-actual_als:]
+            else:
+                top_als = np.arange(len(als_scores))
+            cand_als = {int(i): float(als_scores[i]) for i in top_als}
+        else:
+            cand_als = {}
 
         # Sparse ItemKNN candidates
         rated_items = set(user_ratings.keys())
