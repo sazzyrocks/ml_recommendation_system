@@ -547,7 +547,7 @@ class HybridRecommender(Recommender):
         alpha: float = 40.0,
         reg: float = 0.1,
     ) -> np.ndarray:
-        """
+        r"""
         Compute an instant user latent vector via closed-form ridge regression / ALS step:
         x_u = (Y^T C_u Y + \lambda I)^{-1} Y^T C_u p_u
 
