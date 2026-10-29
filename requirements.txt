@@ -7,9 +7,13 @@ matplotlib
 seaborn
 jupyterlab
 pytest
+pytest-asyncio
+pytest-cov
 pyarrow
 implicit
 sentence-transformers
+tqdm
+requests
 
 # ── Backend & Database packages ──────────────────────────────────────────
 fastapi

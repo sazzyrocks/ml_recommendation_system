@@ -101,6 +101,8 @@ def test_build_movie_documents() -> None:
 
 def test_semantic_search_with_filters() -> None:
     engine = SemanticSearch()
+    if not (engine.embeddings_path.exists() and engine.metadata_path.exists()):
+        pytest.skip("Semantic search artifacts not generated yet.")
     engine.load_index()
 
     # Query with Comedy genre filter
