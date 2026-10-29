@@ -20,7 +20,8 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
-sqlalchemy
+sqlalchemy[asyncio]
+greenlet
 asyncpg
 pgvector
 alembic
