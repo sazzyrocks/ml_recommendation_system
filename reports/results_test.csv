@@ -1,0 +1,9 @@
+timestamp,model,k,precision@k,recall@k,map@k,ndcg@k,hit_rate@k,catalog_coverage,avg_latency_ms,evaluated_users,notes
+2026-10-28T08:45:50.575590+00:00,RandomRecommender,10,0.0011,0.0009,0.0003,0.001,0.0106,0.4418,0.9,610,Sanity floor (random uniform)
+2026-10-28T08:45:51.762067+00:00,PopularityRecommender,10,0.0253,0.0449,0.0219,0.0431,0.1858,0.0101,0.02,610,Ranked by train rating count
+2026-10-28T08:45:53.358802+00:00,WeightedRatingRecommender,10,0.0283,0.0511,0.0228,0.046,0.2088,0.0074,0.02,610,Bayesian average (m=100.0)
+2026-10-28T08:45:55.898639+00:00,ContentRecommender,10,0.0023,0.0021,0.0008,0.0026,0.0212,0.3381,0.52,610,Genres + Tags TF-IDF + Decade buckets
+2026-10-28T08:46:05.956284+00:00,ItemKNN,10,0.0165,0.038,0.0138,0.0292,0.1363,0.1591,1.46,610,Mean-centered cosine (k=10)
+2026-10-28T08:46:53.943560+00:00,BiasedMF,10,0.0149,0.0224,0.0086,0.0208,0.1239,0.0059,0.29,610,"Explicit SGD (d=16, reg=0.02, lr=0.005)"
+2026-10-28T08:46:56.531855+00:00,ImplicitALS,10,0.0342,0.0707,0.0318,0.0611,0.2655,0.0707,1.1,610,"ALS on ratings>=4.0 (d=64, reg=0.1)"
+2026-10-28T08:47:02.531176+00:00,HybridRecommender,10,0.032,0.0756,0.0338,0.063,0.2496,0.1078,3.47,610,"Best tuned fusion (ALS 0.85, KNN 0.15)"
