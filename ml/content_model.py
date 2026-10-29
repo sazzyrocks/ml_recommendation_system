@@ -212,7 +212,8 @@ class ContentRecommender(Recommender):
             if cleaned_path.exists():
                 movies_df = pd.read_parquet(cleaned_path)
             else:
-                unique_items = sorted(int(i) for i in train_df["item_idx"].unique())
+                max_item = max(int(train_df["item_idx"].max()), 100) + 1
+                unique_items = list(range(max_item))
                 movies_df = pd.DataFrame(
                     {
                         "movieId": unique_items,
@@ -243,6 +244,12 @@ class ContentRecommender(Recommender):
             items = grp[item_col].to_numpy()
             ratings = grp[rating_col].to_numpy(dtype=np.float32)
             self.seen_by_user[u] = set(items.tolist())
+
+            valid_mask = (items >= 0) & (items < self.item_matrix.shape[0])
+            if not np.any(valid_mask):
+                continue
+            items = items[valid_mask]
+            ratings = ratings[valid_mask]
 
             user_mean = float(np.mean(ratings))
             weights = ratings - user_mean

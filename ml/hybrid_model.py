@@ -116,7 +116,8 @@ class HybridRecommender(Recommender):
                 self.item_idx_to_mid[i_idx] = mid
                 self.mid_to_item_idx[mid] = i_idx
         else:
-            unique_items = sorted(int(i) for i in train_df["item_idx"].unique())
+            max_item = max(int(train_df["item_idx"].max()), 100) + 1
+            unique_items = list(range(max_item))
             for i_idx in unique_items:
                 self.item_idx_to_title[i_idx] = f"Movie {i_idx}"
                 self.item_idx_to_genres[i_idx] = ["Action", "Drama"]
