@@ -55,3 +55,7 @@ Thumbs.db
 # ── Reports (large auto-generated) ──────────────────────────────────────────
 reports/*.html
 reports/*.pdf
+
+# ── SQLite Databases ────────────────────────────────────────────────────────
+*.db
+*.sqlite3

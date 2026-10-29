@@ -1,4 +1,4 @@
-# ── Phase 1: data science & dev tooling ────────────────────────────────────
+# ── Core data science & recommender packages ──────────────────────────────
 numpy
 pandas
 scipy
@@ -7,3 +7,23 @@ matplotlib
 seaborn
 jupyterlab
 pytest
+pyarrow
+implicit
+sentence-transformers
+
+# ── Backend & Database packages ──────────────────────────────────────────
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+asyncpg
+pgvector
+alembic
+pwdlib[argon2]
+python-jose[cryptography]
+aiosqlite
+httpx
+python-dotenv
+ruff
+black
