@@ -1,8 +1,9 @@
-﻿"""
+"""
 tests/test_health.py
 Smoke-test: verifies the /health endpoint is reachable.
 No DB connection required — the endpoint is intentionally dependency-free.
 """
+
 from fastapi.testclient import TestClient
 
 from backend.main import app
